@@ -33,6 +33,7 @@ local function isOre(block)
 end
 
 local function mineBack(XYZ, isUp)
+    print("jeg blev kaldt for at mine")
     if not XYZ == "y" then
         local isBlock, block = turtle.inspect()
         if isBlock then 
@@ -61,92 +62,69 @@ local function mineBack(XYZ, isUp)
 end
 
 local function goOrigin() 
-    if not currentDir == dir.NORTH then
-        if currentDir == dir.EAST then
-            turtle.turnLeft()
-        elseif currentDir == dir.WEST then
-            turtle.turnRight()
-        else
-            turtle.turnLeft()
-            turtle.turnLeft()
+    print("jeg blev kaldt")
+    local x = currentCoordinates.x
+    local y = currentCoordinates.y
+    local z = currentCoordinates.z
+    if currentDir == dir.EAST then
+        turtle.turnLeft()
+    elseif currentDir == dir.WEST then
+        turtle.turnRight()
+    else
+        turtle.turnLeft()
+        turtle.turnLeft()
+    end
+    if x > 0 then
+        turtle.turnRight()
+        for i = 1, x do
+            mineBack("x", false)
+        end
+    else
+        turtle.turnLeft()
+        for i = 0, x do
+            mineBack("x", false)
         end
     end
-    if not currentCoordinates.y == startCoordinates.y then
-        if currentCoordinates.y > 0 then 
-            for i = 1, currentCoordinates.y do
-                mineBack("y", false)
-            end
-        else
-            for i = currentCoordinates.y, 0 do
-                mineBack("y", true)
-            end
+    if z > 0 then
+        turtle.turnRight()
+        turtle.turnRight()
+        for i = 1, z do
+            mineBack("z", false)
         end
-    elseif not currentCoordinates.z == startCoordinates.z then
-        if  currentCoordinates.z > 0 then
-            for i = 1, currentCoordinates.z do 
-                mineBack("z", false)
-            end
-        else
-            turtle.turnLeft()
-            turtle.turnLeft()
-            for i = currentCoordinates.z, 0 do 
-                mineBack("z", false)
-            end
+    else
+        turtle.turnLeft()
+        turtle.turnRight()
+        for i = 0, z do
+            mineBack("z", false)
         end
-    elseif not currentCoordinates.x == startCoordinates.x then
-        if  currentCoordinates.x > 0 then
-            for i = 1, currentCoordinates.x do 
-                mineBack("x", false)
-            end
-        else
-            turtle.turnLeft()
-            turtle.turnLeft()
-            for i = currentCoordinates.x, 0 do 
-                mineBack("x", false)
-            end
+    end
+    if y > 0 then
+        for i = 1, y do
+            mineBack("y", false)
+        end
+    else
+        for i = 0, x do
+            mineBack("y", true)
         end
     end
 end
 
 
 local function coordsUpdater(xyzDirection, lookingDirection, isMining, isNewDir)
-    print("coordinates Updater Called")
-    print("Mining status: ", isMining)
-    sleep(1)
     if isMining then
-        print("Analysing XYZ and Direction")
-        sleep(2)
         if lookingDirection < lookingDir.UP then
-            print("Verifying if turtle is looking straight...")
-            sleep(2)
             if currentDir == dir.NORTH then
-                print("Direction verified! Moving ahead...")
-                sleep(1)
                 turtle.forward()
                 currentCoordinates.x = currentCoordinates.x-1
-                print("Recorded Movement to database")
-                sleep(1)
             elseif currentDir == dir.WEST then
-                print("Direction verified! Moving ahead...")
-                sleep(1)
                 turtle.forward()
                 currentCoordinates.x = currentCoordinates.x+1
-                print("Recorded Movement to database")
-                sleep(1)
             elseif currentDir == dir.EAST then
-                print("Direction verified! Moving ahead...")
-                sleep(1)
                 turtle.forward()
                 currentCoordinates.x = currentCoordinates.x+1
-                print("Recorded Movement to database")
-                sleep(1)
             elseif currentDir == dir.SOUTH then
-                print("Direction verified! Moving ahead...")
-                sleep(1)
                 turtle.forward()
                 currentCoordinates.z = currentCoordinates.z+1
-                print("Recorded Movement to database")
-                sleep(1)
             end
         end
     -- else
@@ -181,31 +159,20 @@ local function coordsUpdater(xyzDirection, lookingDirection, isMining, isNewDir)
 end
 
 local function directionToCheck(loopRotation)
-    print("Direction Checking... Rotation: ", loopRotation)
-    sleep(2)
     local bool = false
     local block
     if loopRotation == 1 then
-        print("Checking if block is an Ore...")
-        sleep(2)
         local success, block = turtle.inspect()
         if success then
-            print("Ore detected!")
-            sleep(2)
             if isOre(block.name) then
                 bool = true
             end
         end
     elseif loopRotation == 2 then
-        print("Checking LEFT")
-        sleep(1)
         turtle.turnLeft()
-        print("Checking if block is an Ore...")
         local success, block = turtle.inspect()
         if success then
             if isOre(block.name) then
-                print("Ore detected!")
-                sleep(2)
                 currentDir = dir.WEST
                 bool = true
             end
@@ -214,15 +181,10 @@ local function directionToCheck(loopRotation)
             turtle.turnRight()
         end
     elseif loopRotation == 3 then
-        print("Checking RIGHT")
-        sleep(1)
         turtle.turnRight()
-        print("Checking if block is an Ore...")
         local success, block = turtle.inspect()
         if success then
             if isOre(block.name) then
-                print("Ore detected!")
-                sleep(2)
                 currentDir = dir.EAST
                 bool = true
             end
@@ -237,16 +199,9 @@ end
 function harvestOre()
     local i = 1
     while i <= 5 do
-        print("current index value: ", i)
-        print("")
-        print("Last Direction", lastDir)
-        print("Current Direction", currentDir)
-        sleep(2)
         local success =  directionToCheck(i)
 
         if success then
-            print("preparing to mine & move")
-            sleep(1)
             if currentLookingDir < lookingDir.UP then
                 turtle.dig()
                 if lastDir == currentDir then
@@ -265,7 +220,6 @@ function harvestOre()
         end
         i = i + 1
     end
-    coordsUpdater(currentDir, currentLookingDir, false, false)
     goOrigin()
 end
 
